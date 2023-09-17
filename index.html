@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRコードリーダー</title>
 
+    <!-- スタイル定義 -->
     <style>
         .video-container {
             position: relative;
             width: 100%;
-            padding-bottom: 45%; /* この値を変更してエレメントの縦サイズを調整します。 */
+            padding-bottom: 56.25%; /* 16:9のアスペクト比 */
             overflow: hidden;
         }
 
@@ -30,6 +31,7 @@
 
 <body>
 
+<!-- カメラの映像を表示するためのvideoエレメントをコンテナでラップ -->
 <div class="video-container">
     <video id="preview" autoplay playsinline></video>
 </div>
@@ -74,9 +76,8 @@
                         li.textContent = qrCodeResult.data;
                         qrList.appendChild(li);
                         qrCount++;
-                        countEl.textContent = qrCount;
-
-                        // 読み取り成功の音を発生させる (ダミーの音を使用。適切な音ファイルを指定してください。)
+                        countEl.textContent= qrCount;
+                        // 読み取り成功の音を発生させる (適切な音ファイルを指定してください。)
                         const audio = new Audio('success_sound.mp3');
                         audio.play();
                     }
