@@ -65,11 +65,11 @@
     // カメラのストリームを取得
     navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: 'environment'  // 'environment'は背面カメラを示します。
+                facingMode: 'environment'
             }
         }).then((stream) => {
-        video.srcObject = stream;
-        video.play();
+            video.srcObject = stream;
+            video.play();
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
