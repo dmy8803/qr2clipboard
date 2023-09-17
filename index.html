@@ -5,54 +5,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRコードリーダー</title>
-
-    <!-- スタイル定義 -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
         .video-container {
             position: relative;
             width: 100%;
-            height: 50%; /* 画面の上半分の高さに設定 */
+            height: 50vh; /* 端末の縦幅の50% */
             overflow: hidden;
         }
 
         #preview {
             position: absolute;
             top: 0;
-            left: 50%;
-            width: auto;
+            left: 50%; /* 左から中央に位置させるため */
+            transform: translateX(-50%); /* 横位置の中央揃えの調整 */
+            max-width: 100%;
             max-height: 100%;
-            transform: translateX(-50%);
-            object-fit: contain;
+            object-fit: cover;
         }
 
         #results {
-            padding-left: 5%;
+            padding-left: 5%; /* 左側にpaddingを追加 */
         }
     </style>
-
-    <!-- jsQRライブラリのCDNリンク -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
 </head>
 
 <body>
 
-<!-- カメラの映像を表示するためのvideoエレメントをコンテナでラップ -->
 <div class="video-container">
-    <video id="preview" autoplay playsinline></video>
+    <video id="preview"></video>
 </div>
 
-<!-- 保存した値と個数を表示するエリア -->
 <div id="results">
+    <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
     <h3>読み取ったQRコード:</h3>
     <ul id="qr-list"></ul>
-    <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
 </div>
 
 <script>
@@ -63,13 +50,9 @@
     let scannedCodes = [];
 
     // カメラのストリームを取得
-    navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment'
-            }
-        }).then((stream) => {
-            video.srcObject = stream;
-            video.play();
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+        video.srcObject = stream;
+        video.play();
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -84,9 +67,9 @@
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
                 if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
-                    scannedCodes.push(qrCodeResult.data); // 読み取った値を保存
+                    scannedCodes.push(qrCodeResult.data);
                     const currentClipboardContent = await navigator.clipboard.readText();
-                    if (qrCodeResult.data !== currentClipboardContent) {
+                    if (!currentClipboardContent.includes(qrCodeResult.data)) {
                         // クリップボードにコピー
                         navigator.clipboard.writeText(qrCodeResult.data);
                         // QRコードの内容を画面に表示
@@ -94,8 +77,9 @@
                         li.textContent = qrCodeResult.data;
                         qrList.appendChild(li);
                         qrCount++;
-                        countEl.textContent= qrCount;
-                        // 読み取り成功の音を発生させる (適切な音ファイルを指定してください。)
+                        countEl.textContent = qrCount;
+
+                        // 読み取り成功の音を発生させる (適切な音ファイルを指定してください)
                         const audio = new Audio('success_sound.mp3');
                         audio.play();
                     }
