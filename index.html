@@ -31,6 +31,10 @@
             transform: translateX(-50%);
             object-fit: contain;
         }
+
+        #results {
+            padding-left: 5%;
+        }
     </style>
 
     <!-- jsQRライブラリのCDNリンク -->
@@ -59,7 +63,11 @@
     let scannedCodes = [];
 
     // カメラのストリームを取得
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+    navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment'  // 'environment'は背面カメラを示します。
+            }
+        }).then((stream) => {
         video.srcObject = stream;
         video.play();
 
