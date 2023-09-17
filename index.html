@@ -56,6 +56,7 @@
     const qrList = document.getElementById('qr-list');
     const countEl = document.getElementById('count');
     let qrCount = 0;
+    let scannedCodes = [];
 
     // カメラのストリームを取得
     navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
@@ -74,7 +75,8 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
-                if (qrCodeResult) {
+                if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
+                    scannedCodes.push(qrCodeResult.data); // 読み取った値を保存
                     const currentClipboardContent = await navigator.clipboard.readText();
                     if (qrCodeResult.data !== currentClipboardContent) {
                         // クリップボードにコピー
