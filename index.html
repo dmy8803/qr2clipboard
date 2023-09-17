@@ -8,19 +8,27 @@
 
     <!-- スタイル定義 -->
     <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
         .video-container {
             position: relative;
-            width: 80%;
-            padding-bottom: 80%;
+            width: 100%;
+            height: 50%; /* 上半分の高さに設定 */
             overflow: hidden;
         }
 
         #preview {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 50%;
+            left: 50%;
+            width: auto;
             height: 100%;
+            transform: translate(-50%, -50%);
             object-fit: cover;
         }
     </style>
