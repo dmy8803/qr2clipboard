@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Reader</title>
     <style>
-        /* レスポンシブ対応のためのCSS */
         .video-container {
             position: relative;
             width: 100%;
@@ -25,7 +24,6 @@
 </head>
 <body>
 
-<!-- カメラの映像を表示するためのvideoエレメントをコンテナでラップ -->
 <div class="video-container">
     <video id="preview" autoplay playsinline></video>
 </div>
@@ -33,37 +31,38 @@
 <div id="result"></div>
 <div id="total"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+<!-- 特定のバージョンを指定 -->
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@3.10.0"></script>
 <script>
     const video = document.getElementById('preview');
     const codeReader = new ZXing.BrowserQRCodeReader();
     let scannedCodes = [];
 
+    // サウンドを一度だけ生成
+    const successSound = new Audio('success-sound.mp3');
+
     codeReader.getVideoInputDevices()
         .then((videoInputDevices) => {
-            return codeReader.startContinuousDecodeFromVideoDevice(videoInputDevices[0].deviceId, 'preview')
+            return codeReader.startContinuousDecodeFromVideoDevice(videoInputDevices[0].deviceId, 'preview');
         })
         .then((result) => {
-            video.play(); // カメラの映像をvideoエレメントに再生させる
+            video.play();
 
             result.addEventListener('scan', (e) => {
-                if (e && e.data) {
-                    if (!scannedCodes.includes(e.data)) {
-                        scannedCodes.push(e.data);
+                if (e && e.data && !scannedCodes.includes(e.data)) {
+                    scannedCodes.push(e.data);
 
-                        const currentClipboardData = navigator.clipboard.readText().then((text) => {
-                            if (!text.includes(e.data)) {
-                                navigator.clipboard.writeText(text + "\n" + e.data);
-                            }
-                        });
+                    navigator.clipboard.readText().then((text) => {
+                        if (!text.includes(e.data)) {
+                            navigator.clipboard.writeText(text + "\n" + e.data);
+                        }
+                    });
 
-                        // サウンドを再生 (適切なサウンドファイルのURLをセットしてください)
-                        let audio = new Audio('success-sound.mp3');
-                        audio.play();
+                    // サウンドを再生
+                    successSound.play();
 
-                        document.getElementById('result').innerText = scannedCodes.join("\n");
-                        document.getElementById('total').innerText = `Total: ${scannedCodes.length}`;
-                    }
+                    document.getElementById('result').innerText = scannedCodes.join("\n");
+                    document.getElementById('total').innerText = `Total: ${scannedCodes.length}`;
                 }
             });
         })
