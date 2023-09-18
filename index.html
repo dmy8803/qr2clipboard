@@ -74,6 +74,12 @@
 
                     // scannedCodesに読み取ったQRコードの内容が含まれているかどうかを確認
                     if (!scannedCodes.includes(qrCodeResult.data)) {
+                        // クリップボードにQRコードの内容をコピー
+                        navigator.clipboard.writeText(qrCodeResult.data).then(() => {
+                            console.log("QRコードの内容をクリップボードにコピーしました。");
+                        }).catch(err => {
+                            console.error("クリップボードへのコピーに失敗:", err);
+                        });
                         // 配列に内容を追加
                         scannedCodes.push(qrCodeResult.data);
 
