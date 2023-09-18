@@ -68,14 +68,14 @@
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
                 if (qrCodeResult) {
-                    const currentClipboardContent = await navigator.clipboard.readText();
-                    if (qrCodeResult.data !== currentClipboardContent) {
-                        // 現在の日時を取得してフォーマットする
-                        const now = new Date();
-                        const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+                    // 現在の日時を取得してフォーマットする
+                    const now = new Date();
+                    const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-                        // クリップボードにコピー
-                        navigator.clipboard.writeText(qrCodeResult.data);
+                    // scannedCodesに読み取ったQRコードの内容が含まれているかどうかを確認
+                    if (!scannedCodes.includes(qrCodeResult.data)) {
+                        // 配列に内容を追加
+                        scannedCodes.push(qrCodeResult.data);
 
                         // 日時とQRコードの内容を一緒に画面に表示
                         const li = document.createElement('li');
@@ -85,7 +85,7 @@
                         qrCount++;
                         countEl.textContent = qrCount;
 
-                        // 読み取り成功の音を発生させる
+                        // 読み取り成功の音を発生させる (必要に応じて)
                         const audio = new Audio('success_sound.mp3');
                         audio.play();
                     }
