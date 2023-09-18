@@ -10,15 +10,15 @@
         .video-container {
             position: relative;
             width: 100%;
-            height: 50vh; /* 端末の縦幅の50% */
+            height: 50vh;
             overflow: hidden;
         }
 
         #preview {
             position: absolute;
             top: 0;
-            left: 50%; /* 左から中央に位置させるため */
-            transform: translateX(-50%); /* 横位置の中央揃えの調整 */
+            left: 50%;
+            transform: translateX(-50%);
             max-width: 100%;
             max-height: 100%;
             object-fit: cover;
@@ -52,7 +52,7 @@
         <input type="checkbox" id="toggle-date" checked> 日付を表示
     </label>
     <h3>読み取ったQRコード:</h3>
-    <ul id="qr-list"></ul>
+    <ul id="qr-list" class="show-date"></ul>
 </div>
 
 <script>
