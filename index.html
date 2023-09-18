@@ -33,17 +33,16 @@
 
 <body>
 
-<div>
-    <input type="checkbox" id="toggleDate" checked>
-    <label for="toggleDate">日付を表示</label>
-</div>
-
 <div class="video-container">
     <video id="preview"></video>
 </div>
 
 <div id="results">
     <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
+    <div>
+        <input type="checkbox" id="toggleDate" checked>
+        <label for="toggleDate">日付を表示</label>
+    </div>
     <h3>読み取ったQRコード:</h3>
     <ul id="qr-list"></ul>
 </div>
@@ -66,9 +65,9 @@
         const dateElements = document.querySelectorAll('#qr-list span');
         dateElements.forEach(span => {
             if (isDateVisible) {
-                span.style.display = 'inline';
+                span.style.visibility = 'visible';
             } else {
-                span.style.display = 'none';
+                span.style.visibility = 'hidden';
             }
         });
     }
