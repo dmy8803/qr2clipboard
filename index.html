@@ -29,12 +29,12 @@
             padding-right: 5%;
         }
 
-        .date-content, 
+        .date-content,
         .date-separator {
             display: none;
         }
 
-        .show-date .date-content, 
+        .show-date .date-content,
         .show-date .date-separator {
             display: inline;
         }
@@ -48,11 +48,11 @@
 </div>
 
 <div id="results">
-    <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
+    <p><strong>読み取り数:</strong> <span id="count">0</span></p>
     <label>
-        <input type="checkbox" id="toggle-date" checked> 日付を表示
+        <input type="checkbox" id="toggle-date" checked> 日時を表示
     </label>
-    <h3>読み取ったQRコード:</h3>
+    <h3>読み取り済みQRコード:</h3>
     <ul id="qr-list" class="show-date"></ul>
 </div>
 
@@ -100,7 +100,6 @@
                     qrCount++;
                     countEl.textContent = qrCount;
 
-                    // 読み取り成功の音を発生させる
                     const audio = new Audio('success_sound.mp3');
                     audio.play();
                 }
@@ -108,7 +107,7 @@
         }, 100);
     })
     .catch((err) => {
-        console.error("カメラのアクセスに失敗しました:", err);
+        console.error("カメラへのアクセスに失敗しました", err);
     });
 </script>
 
