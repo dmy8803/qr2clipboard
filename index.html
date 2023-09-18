@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRコードリーダー</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
-    <script src="https://cdn.rawgit.com/serratus/quaggaJS/0420d5e0/dist/quagga.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         .video-container {
             position: relative;
@@ -53,7 +53,7 @@
     <label>
         <input type="checkbox" id="toggle-date" checked> 日時を表示
     </label>
-    <h3>読み取り済みQRコード:</h3>
+    <h3>読み取り済みコード:</h3>
     <ul id="qr-list" class="show-date"></ul>
 </div>
 
@@ -68,35 +68,6 @@
     toggleDate.addEventListener('change', function() {
         qrList.classList.toggle('show-date', this.checked);
     });
-
-    function handleQRCode(result) {
-        if (result && !scannedCodes.includes(result.data)) {
-            scannedCodes.push(result.data);
-            displayResult(result.data);
-        }
-    }
-
-    function handleBarCode(result) {
-        if (result && result.codeResult && !scannedCodes.includes(result.codeResult.code)) {
-            scannedCodes.push(result.codeResult.code);
-            displayResult(result.codeResult.code);
-        }
-    }
-
-    function displayResult(data) {
-        const now = new Date();
-        const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-        const li = document.createElement('li');
-        li.innerHTML = `<span class="date-content">${formattedDate}</span> <span class="date-separator">-</span> ${data}`;
-        qrList.appendChild(li);
-
-        navigator.clipboard.writeText(data);
-        qrCount++;
-        countEl.textContent = qrCount;
-        const audio = new Audio('success_sound.mp3');
-        audio.play();
-    }
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
     .then((stream) => {
@@ -115,21 +86,62 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
-                handleQRCode(qrCodeResult);
-
-                Quagga.decodeSingle({
-                    decoder: {
-                        readers: ["ean_reader"]
-                    },
-                    locate: true,
-                    src: canvas.toDataURL()
-                }, handleBarCode);
+                if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
+                    scannedCodes.push(qrCodeResult.data);
+                    displayResult(qrCodeResult.data);
+                }
             }
         }, 100);
     })
     .catch((err) => {
         console.error("カメラへのアクセスに失敗しました", err);
     });
+
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            constraints: {
+                facingMode: "environment"
+            },
+            target: document.querySelector('#preview')
+        },
+        decoder: {
+            readers: ["ean_reader"]
+        }
+    }, function(error) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        Quagga.start();
+    });
+
+    Quagga.onDetected(function(result) {
+        const code = result.codeResult.code;
+        if (!scannedCodes.includes(code)) {
+            scannedCodes.push(code);
+            displayResult(code);
+        }
+    });
+
+    function displayResult(code) {
+        const now = new Date();
+        const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="date-content">${formattedDate}</span> <span class="date-separator">-</span> ${code}`;
+        qrList.appendChild(li);
+
+        navigator.clipboard.writeText(code);
+
+        qrCount++;
+        countEl.textContent = qrCount;
+
+        const audio = new Audio('success_sound.mp3');
+        audio.play();
+    }
+
 </script>
 
 </body>
