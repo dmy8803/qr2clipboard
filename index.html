@@ -67,20 +67,25 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
-                if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
-                    scannedCodes.push(qrCodeResult.data);
+                if (qrCodeResult) {
                     const currentClipboardContent = await navigator.clipboard.readText();
-                    if (!currentClipboardContent.includes(qrCodeResult.data)) {
+                    if (qrCodeResult.data !== currentClipboardContent) {
+                        // 現在の日時を取得してフォーマットする
+                        const now = new Date();
+                        const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
                         // クリップボードにコピー
                         navigator.clipboard.writeText(qrCodeResult.data);
-                        // QRコードの内容を画面に表示
+
+                        // 日時とQRコードの内容を一緒に画面に表示
                         const li = document.createElement('li');
-                        li.textContent = qrCodeResult.data;
+                        li.innerHTML = `<span>${formattedDate}</span> - ${qrCodeResult.data}`;
                         qrList.appendChild(li);
+
                         qrCount++;
                         countEl.textContent = qrCount;
 
-                        // 読み取り成功の音を発生させる (適切な音ファイルを指定してください)
+                        // 読み取り成功の音を発生させる
                         const audio = new Audio('success_sound.mp3');
                         audio.play();
                     }
