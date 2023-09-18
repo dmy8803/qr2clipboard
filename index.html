@@ -10,15 +10,15 @@
         .video-container {
             position: relative;
             width: 100%;
-            height: 50vh;
+            height: 50vh; /* 端末の縦幅の50% */
             overflow: hidden;
         }
 
         #preview {
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 50%; /* 左から中央に位置させるため */
+            transform: translateX(-50%); /* 横位置の中央揃えの調整 */
             max-width: 100%;
             max-height: 100%;
             object-fit: cover;
@@ -30,7 +30,12 @@
         }
 
         .date-separator {
-            display: none; /* 初期状態では非表示にしておく */
+            display: none;
+        }
+
+        .show-date .date-separator,
+        .show-date .date-content {
+            display: inline;
         }
     </style>
 </head>
@@ -38,17 +43,14 @@
 <body>
 
 <div class="video-container">
-    <video id="preview"></video>
+    <video id="preview" playsinline></video>
 </div>
 
 <div id="results">
     <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
-
-    <!-- 日付の表示をトグルするチェックボックス -->
     <label>
-        <input type="checkbox" id="toggleDate"> 日付の表示
+        <input type="checkbox" id="toggle-date" checked> 日付を表示
     </label>
-
     <h3>読み取ったQRコード:</h3>
     <ul id="qr-list"></ul>
 </div>
@@ -57,11 +59,16 @@
     const video = document.getElementById('preview');
     const qrList = document.getElementById('qr-list');
     const countEl = document.getElementById('count');
+    const toggleDate = document.getElementById('toggle-date');
     let qrCount = 0;
     let scannedCodes = [];
 
-    // カメラのストリームを取得
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+    toggleDate.addEventListener('change', function() {
+        qrList.classList.toggle('show-date', this.checked);
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then((stream) => {
         video.srcObject = stream;
         video.play();
 
@@ -80,43 +87,24 @@
                 if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
                     scannedCodes.push(qrCodeResult.data);
 
-                    // 日時のフォーマット
                     const now = new Date();
                     const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-                    // 画面表示
                     const li = document.createElement('li');
-                    li.innerHTML = `<span>${formattedDate}</span> <span class="date-separator">-</span> ${qrCodeResult.data}`;
+                    li.innerHTML = `<span class="date-content">${formattedDate}</span> <span class="date-separator">-</span> ${qrCodeResult.data}`;
                     qrList.appendChild(li);
+
+                    navigator.clipboard.writeText(qrCodeResult.data);
 
                     qrCount++;
                     countEl.textContent = qrCount;
-
-                    // クリップボードへのコピー
-                    navigator.clipboard.writeText(qrCodeResult.data);
                 }
             }
         }, 100);
-
-    }).catch((err) => {
+    })
+    .catch((err) => {
         console.error("カメラのアクセスに失敗しました:", err);
     });
-
-    // 日付の表示トグルの処理
-    const toggleDateCheckbox = document.getElementById('toggleDate');
-    toggleDateCheckbox.addEventListener('change', function() {
-        const dates = document.querySelectorAll('#qr-list > li > span:first-child');
-        const separators = document.querySelectorAll('.date-separator');
-
-        if (this.checked) {
-            dates.forEach(date => date.style.display = 'inline');
-            separators.forEach(separator => separator.style.display = 'inline');
-        } else {
-            dates.forEach(date => date.style.display = 'none');
-            separators.forEach(separator => separator.style.display = 'none');
-        }
-    });
-
 </script>
 
 </body>
