@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRコードリーダー</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
+    <script src="https://cdn.rawgit.com/serratus/quaggaJS/0420d5e0/dist/quagga.min.js"></script>
     <style>
         .video-container {
             position: relative;
@@ -68,6 +69,35 @@
         qrList.classList.toggle('show-date', this.checked);
     });
 
+    function handleQRCode(result) {
+        if (result && !scannedCodes.includes(result.data)) {
+            scannedCodes.push(result.data);
+            displayResult(result.data);
+        }
+    }
+
+    function handleBarCode(result) {
+        if (result && result.codeResult && !scannedCodes.includes(result.codeResult.code)) {
+            scannedCodes.push(result.codeResult.code);
+            displayResult(result.codeResult.code);
+        }
+    }
+
+    function displayResult(data) {
+        const now = new Date();
+        const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="date-content">${formattedDate}</span> <span class="date-separator">-</span> ${data}`;
+        qrList.appendChild(li);
+
+        navigator.clipboard.writeText(data);
+        qrCount++;
+        countEl.textContent = qrCount;
+        const audio = new Audio('success_sound.mp3');
+        audio.play();
+    }
+
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
     .then((stream) => {
         video.srcObject = stream;
@@ -85,24 +115,15 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
-                if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
-                    scannedCodes.push(qrCodeResult.data);
+                handleQRCode(qrCodeResult);
 
-                    const now = new Date();
-                    const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span class="date-content">${formattedDate}</span> <span class="date-separator">-</span> ${qrCodeResult.data}`;
-                    qrList.appendChild(li);
-
-                    navigator.clipboard.writeText(qrCodeResult.data);
-
-                    qrCount++;
-                    countEl.textContent = qrCount;
-
-                    const audio = new Audio('success_sound.mp3');
-                    audio.play();
-                }
+                Quagga.decodeSingle({
+                    decoder: {
+                        readers: ["ean_reader"]
+                    },
+                    locate: true,
+                    src: canvas.toDataURL()
+                }, handleBarCode);
             }
         }, 100);
     })
