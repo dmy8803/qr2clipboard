@@ -28,6 +28,10 @@
             padding-left: 5%;
             padding-right: 5%;
         }
+
+        .date-separator {
+            display: none; /* 初期状態では非表示にしておく */
+        }
     </style>
 </head>
 
@@ -39,10 +43,12 @@
 
 <div id="results">
     <p><strong>読み取り個数:</strong> <span id="count">0</span></p>
-    <div>
-        <input type="checkbox" id="toggleDate" checked>
-        <label for="toggleDate">日付を表示</label>
-    </div>
+
+    <!-- 日付の表示をトグルするチェックボックス -->
+    <label>
+        <input type="checkbox" id="toggleDate"> 日付の表示
+    </label>
+
     <h3>読み取ったQRコード:</h3>
     <ul id="qr-list"></ul>
 </div>
@@ -54,24 +60,7 @@
     let qrCount = 0;
     let scannedCodes = [];
 
-    let isDateVisible = true;
-
-    document.getElementById('toggleDate').addEventListener('change', function() {
-        isDateVisible = this.checked;
-        updateDateVisibility();
-    });
-
-    function updateDateVisibility() {
-        const dateElements = document.querySelectorAll('#qr-list span');
-        dateElements.forEach(span => {
-            if (isDateVisible) {
-                span.style.visibility = 'visible';
-            } else {
-                span.style.visibility = 'hidden';
-            }
-        });
-    }
-
+    // カメラのストリームを取得
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
         video.srcObject = stream;
         video.play();
@@ -79,7 +68,7 @@
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
 
-        setInterval(async () => {
+        setInterval(() => {
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
@@ -89,27 +78,22 @@
                 const qrCodeResult = jsQR(imageData.data, canvas.width, canvas.height);
 
                 if (qrCodeResult && !scannedCodes.includes(qrCodeResult.data)) {
-                    const now = new Date();
-                    const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
                     scannedCodes.push(qrCodeResult.data);
 
-                    const li = document.createElement('li');
-                    if (isDateVisible) {
-                        li.innerHTML = `<span>${formattedDate}</span> - ${qrCodeResult.data}`;
-                    } else {
-                        li.innerHTML = `${qrCodeResult.data}`;
-                    }
+                    // 日時のフォーマット
+                    const now = new Date();
+                    const formattedDate = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
+                    // 画面表示
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${formattedDate}</span> <span class="date-separator">-</span> ${qrCodeResult.data}`;
                     qrList.appendChild(li);
 
                     qrCount++;
                     countEl.textContent = qrCount;
 
-                    navigator.clipboard.writeText(qrCodeResult.data).then(() => {
-                        console.log("クリップボードに保存しました。");
-                    }).catch(err => {
-                        console.error("クリップボードへのアクセスに失敗:", err);
-                    });
+                    // クリップボードへのコピー
+                    navigator.clipboard.writeText(qrCodeResult.data);
                 }
             }
         }, 100);
@@ -117,6 +101,22 @@
     }).catch((err) => {
         console.error("カメラのアクセスに失敗しました:", err);
     });
+
+    // 日付の表示トグルの処理
+    const toggleDateCheckbox = document.getElementById('toggleDate');
+    toggleDateCheckbox.addEventListener('change', function() {
+        const dates = document.querySelectorAll('#qr-list > li > span:first-child');
+        const separators = document.querySelectorAll('.date-separator');
+
+        if (this.checked) {
+            dates.forEach(date => date.style.display = 'inline');
+            separators.forEach(separator => separator.style.display = 'inline');
+        } else {
+            dates.forEach(date => date.style.display = 'none');
+            separators.forEach(separator => separator.style.display = 'none');
+        }
+    });
+
 </script>
 
 </body>
