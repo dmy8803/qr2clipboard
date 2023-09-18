@@ -15,16 +15,6 @@
             overflow: hidden;
         }
 
-        #preview {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: cover;
-        }
-
         #results {
             padding-left: 10%;
             padding-right: 10%;
@@ -45,7 +35,7 @@
 <body>
 
 <div class="video-container">
-    <video id="preview" playsinline></video>
+    <div id="preview"></div>
 </div>
 
 <div id="results">
@@ -58,7 +48,6 @@
 </div>
 
 <script>
-    const video = document.getElementById('preview');
     const qrList = document.getElementById('qr-list');
     const countEl = document.getElementById('count');
     const toggleDate = document.getElementById('toggle-date');
